@@ -1,1 +1,266 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NER Landslide Risk Monitoring System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            margin-top: 8px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #17365d;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            box-sizing: border-box;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 7px;
+            background: #17365d;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #24568f;
+        }
+
+        #result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .map-button {
+            background: #287233;
+        }
+
+        .map-button:hover {
+            background: #1d5527;
+        }
+
+        .note {
+            font-size: 13px;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 700px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌋 NER Landslide Risk Monitoring System</h1>
+    <p>AI-Based Early Warning and Landslide Risk Monitoring for North-Eastern Region of India</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>🔍 Landslide Risk Prediction</h2>
+
+        <div class="grid">
+
+            <div>
+                <label>Latitude</label>
+                <input id="latitude" type="number" step="any" value="25.3098633">
+            </div>
+
+            <div>
+                <label>Longitude</label>
+                <input id="longitude" type="number" step="any" value="94.48214677">
+            </div>
+
+            <div>
+                <label>Rainfall (mm/day)</label>
+                <input id="rainfall_mm_day" type="number" step="any" value="17.06">
+            </div>
+
+            <div>
+                <label>Elevation (m)</label>
+                <input id="elevation_m" type="number" step="any" value="1356.59">
+            </div>
+
+            <div>
+                <label>Slope (degrees)</label>
+                <input id="slope_deg" type="number" step="any" value="15">
+            </div>
+
+            <div>
+                <label>Aspect (degrees)</label>
+                <input id="aspect_deg" type="number" step="any" value="180">
+            </div>
+
+            <div>
+                <label>Distance to River (m)</label>
+                <input id="distance_to_river_m" type="number" step="any" value="500">
+            </div>
+
+            <div>
+                <label>NDVI</label>
+                <input id="ndvi" type="number" step="any" value="0.4">
+            </div>
+
+            <div>
+                <label>LULC Class</label>
+                <input id="lulc_class" type="number" step="any" value="1">
+            </div>
+
+        </div>
+
+        <button onclick="analyzeRisk()">
+            🔍 Analyze Landslide Risk
+        </button>
+
+        <div id="result"></div>
+
+        <p class="note">
+            Enter environmental and geographical parameters to estimate landslide risk using the trained Random Forest model.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>🗺️ NER Landslide Risk Map</h2>
+
+        <p>
+            Explore the spatial distribution of landslide risk across the
+            North-Eastern Region of India.
+        </p>
+
+        <button class="map-button" onclick="window.open('/static/NER_Landslide_Risk_Map.html', '_blank')">
+            🗺️ Open NER Risk Map
+        </button>
+    </div>
+
+</div>
+
+<script>
+
+async function analyzeRisk() {
+
+    const data = {
+        latitude: document.getElementById("latitude").value,
+        longitude: document.getElementById("longitude").value,
+        rainfall_mm_day: document.getElementById("rainfall_mm_day").value,
+        elevation_m: document.getElementById("elevation_m").value,
+        slope_deg: document.getElementById("slope_deg").value,
+        aspect_deg: document.getElementById("aspect_deg").value,
+        distance_to_river_m: document.getElementById("distance_to_river_m").value,
+        ndvi: document.getElementById("ndvi").value,
+        lulc_class: document.getElementById("lulc_class").value
+    };
+
+    const resultBox = document.getElementById("result");
+
+    resultBox.style.display = "block";
+    resultBox.innerHTML = "⏳ Analyzing...";
+
+    try {
+
+        const response = await fetch("/predict", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+
+            resultBox.innerHTML =
+                "⚠️ Landslide Risk: " + result.risk +
+                "<br><small>Model Confidence: " +
+                result.confidence + "%</small>";
+
+        } else {
+
+            resultBox.innerHTML =
+                "❌ Error: " + result.error;
+        }
+
+    } catch (error) {
+
+        resultBox.innerHTML =
+            "❌ Unable to connect to prediction server.";
+    }
+}
+
+</script>
+
+</body>
+</html>
+
