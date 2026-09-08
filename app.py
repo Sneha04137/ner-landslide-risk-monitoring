@@ -1,5 +1,4 @@
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import joblib
 import numpy as np
 import os
@@ -73,7 +72,8 @@ def predict():
 
 @app.route("/map")
 def risk_map():
-    return render_template(
+    return send_from_directory(
+        os.path.join(app.root_path, "static"),
         "NER_Landslide_Risk_Map.html"
     )
 
@@ -84,3 +84,4 @@ if __name__ == "__main__":
         port=int(os.environ.get("PORT", 5000)),
         debug=False
     )
+
