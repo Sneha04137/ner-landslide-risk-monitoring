@@ -207,6 +207,7 @@
 </div>
 
 <script>
+
 function openRiskMap() {
 
     const savedData = localStorage.getItem("lastRiskData");
@@ -253,8 +254,11 @@ function openRiskMap() {
     } catch (error) {
 
         alert("Please analyze the location again.");
+
     }
 }
+
+
 async function analyzeRisk() {
 
     const data = {
@@ -286,55 +290,42 @@ async function analyzeRisk() {
 
         const result = await response.json();
 
-       if (result.success) {
+        if (result.success) {
 
-    resultBox.innerHTML =
-        "⚠️ Landslide Risk: <strong>" + result.risk +
-        "</strong><br><small>Model Confidence: " +
-        result.confidence + "%</small>";
+            resultBox.innerHTML =
+                "⚠️ Landslide Risk: <strong>" +
+                result.risk +
+                "</strong><br><small>Model Confidence: " +
+                result.confidence +
+                "%</small>";
 
-    // Save latest analysis for the map
-    const riskData = {
-        latitude: Number(data.latitude),
-        longitude: Number(data.longitude),
-        risk: String(result.risk),
-        confidence: Number(result.confidence)
-    };
+            // Save latest analysis for the map
+            const riskData = {
+                latitude: Number(data.latitude),
+                longitude: Number(data.longitude),
+                risk: String(result.risk),
+                confidence: Number(result.confidence)
+            };
 
-    localStorage.setItem(
-        "lastRiskData",
-        JSON.stringify(riskData)
-    );
+            localStorage.setItem(
+                "lastRiskData",
+                JSON.stringify(riskData)
+            );
 
-} else {
+        } else {
 
-    resultBox.innerHTML =
-        "❌ Error: " + result.error;
-}
+            resultBox.innerHTML =
+                "❌ Error: " + result.error;
 
-    // Save latest analysis for the map
-   const riskData = {
-    latitude: Number(data.latitude),
-    longitude: Number(data.longitude),
-    risk: String(result.risk),
-    confidence: Number(result.confidence)
-};
-
-    localStorage.setItem(
-        "lastRiskData",
-        JSON.stringify(riskData)
-    );
-
-} else {
-
-    resultBox.innerHTML =
-        "❌ Error: " + result.error;
-}
+        }
 
     } catch (error) {
 
+        console.error(error);
+
         resultBox.innerHTML =
             "❌ Unable to connect to prediction server.";
+
     }
 }
 
