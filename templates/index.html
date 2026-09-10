@@ -241,16 +241,29 @@ async function analyzeRisk() {
 
         if (result.success) {
 
-            resultBox.innerHTML =
-                "⚠️ Landslide Risk: " + result.risk +
-                "<br><small>Model Confidence: " +
-                result.confidence + "%</small>";
+    resultBox.innerHTML =
+        "⚠️ Landslide Risk: <strong>" + result.risk +
+        "</strong><br><small>Model Confidence: " +
+        result.confidence + "%</small>";
 
-        } else {
+    // Save latest analysis for the map
+    const riskData = {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        risk: result.risk,
+        confidence: result.confidence
+    };
 
-            resultBox.innerHTML =
-                "❌ Error: " + result.error;
-        }
+    localStorage.setItem(
+        "lastRiskData",
+        JSON.stringify(riskData)
+    );
+
+} else {
+
+    resultBox.innerHTML =
+        "❌ Error: " + result.error;
+}
 
     } catch (error) {
 
