@@ -199,15 +199,34 @@
             North-Eastern Region of India.
         </p>
 
-        <button class="map-button" onclick="window.open('/static/NER_Landslide_Risk_Map.html', '_blank')">
-            🗺️ Open NER Risk Map
-        </button>
+       <button class="map-button" onclick="openRiskMap()">
+    🗺️ Open Current Risk Map
+</button>
     </div>
 
 </div>
 
 <script>
+function openRiskMap() {
 
+    const savedData = localStorage.getItem("lastRiskData");
+
+    if (!savedData) {
+        alert("Please analyze a location first.");
+        return;
+    }
+
+    const data = JSON.parse(savedData);
+
+    const url =
+        "/current-map" +
+        "?lat=" + encodeURIComponent(data.latitude) +
+        "&lon=" + encodeURIComponent(data.longitude) +
+        "&risk=" + encodeURIComponent(data.risk) +
+        "&confidence=" + encodeURIComponent(data.confidence);
+
+    window.open(url, "_blank");
+}
 async function analyzeRisk() {
 
     const data = {
