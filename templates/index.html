@@ -216,16 +216,44 @@ function openRiskMap() {
         return;
     }
 
-    const data = JSON.parse(savedData);
+    try {
 
-    const url =
-        "/current-map" +
-        "?lat=" + encodeURIComponent(data.latitude) +
-        "&lon=" + encodeURIComponent(data.longitude) +
-        "&risk=" + encodeURIComponent(data.risk) +
-        "&confidence=" + encodeURIComponent(data.confidence);
+        const data = JSON.parse(savedData);
 
-    window.open(url, "_blank");
+        const latitude = Number(data.latitude);
+        const longitude = Number(data.longitude);
+        const risk = String(data.risk);
+        const confidence = Number(data.confidence);
+
+        if (!Number.isFinite(latitude) ||
+            latitude < -90 ||
+            latitude > 90) {
+
+            alert("Invalid latitude. Please analyze the location again.");
+            return;
+        }
+
+        if (!Number.isFinite(longitude) ||
+            longitude < -180 ||
+            longitude > 180) {
+
+            alert("Invalid longitude. Please analyze the location again.");
+            return;
+        }
+
+        const url =
+            "/current-map" +
+            "?lat=" + encodeURIComponent(latitude) +
+            "&lon=" + encodeURIComponent(longitude) +
+            "&risk=" + encodeURIComponent(risk) +
+            "&confidence=" + encodeURIComponent(confidence);
+
+        window.open(url, "_blank");
+
+    } catch (error) {
+
+        alert("Please analyze the location again.");
+    }
 }
 async function analyzeRisk() {
 
@@ -258,7 +286,7 @@ async function analyzeRisk() {
 
         const result = await response.json();
 
-        if (result.success) {
+       if (result.success) {
 
     resultBox.innerHTML =
         "⚠️ Landslide Risk: <strong>" + result.risk +
@@ -267,11 +295,30 @@ async function analyzeRisk() {
 
     // Save latest analysis for the map
     const riskData = {
-        latitude: data.latitude,
-        longitude: data.longitude,
-        risk: result.risk,
-        confidence: result.confidence
+        latitude: Number(data.latitude),
+        longitude: Number(data.longitude),
+        risk: String(result.risk),
+        confidence: Number(result.confidence)
     };
+
+    localStorage.setItem(
+        "lastRiskData",
+        JSON.stringify(riskData)
+    );
+
+} else {
+
+    resultBox.innerHTML =
+        "❌ Error: " + result.error;
+}
+
+    // Save latest analysis for the map
+   const riskData = {
+    latitude: Number(data.latitude),
+    longitude: Number(data.longitude),
+    risk: String(result.risk),
+    confidence: Number(result.confidence)
+};
 
     localStorage.setItem(
         "lastRiskData",
